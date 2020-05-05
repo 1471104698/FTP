@@ -17,7 +17,7 @@ public class ListProcessor implements Commond {
 
     @Override
     public void commond(Order order, FTPServer ftpServer) {
-        File[] files = list(FTPServer.getPath());
+        File[] files = list(ftpServer.getPath());
         assert files != null;
         StringBuilder sb = new StringBuilder();
         sb.append("总共有 ").append(files.length).append(" 个文件/文件夹\r\n");

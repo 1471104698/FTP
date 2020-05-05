@@ -17,63 +17,47 @@ import java.io.*;
 public class DownloadProcessor implements Commond {
     @Override
     public void commond(Order order, FTPServer ftpServer) {
-
-
         String fileName = order.getMsg();
-        String path = FTPServer.getPath() + File.separator + fileName;
+        String path = ftpServer.getPath() + File.separator + fileName;
         File file = new File(path);
-        if(!file.exists()){
+        //判断文件是否存在
+        if (!file.exists()) {
             ftpServer.sendLine(Result.error("文件不存在"));
             return;
         }
         ftpServer.sendLine(Result.ok("开始文件传输..."));
-        if(file.isDirectory()){   //下载的是文件夹
-            File[] files = file.listFiles();
-            //告知客户端传输文件个数
-            assert files != null;
-            ftpServer.sendLine(Result.ok(String.valueOf(files.length)));
-            //再分别传输文件
-            for(File f : files){
-                //传输文件名
-                ftpServer.sendLine(Result.ok(f.getName()));
-                //传输文件大小
-                ftpServer.sendLine(Result.ok(String.valueOf(f.length())));
-                try {
-                    download(f, ftpServer.getDataSocket().getOutputStream());
-                    Thread.sleep(500);
-                } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }else {   //下载的是文件，注意：如果文件路径是不存在的，那么 isDirectory() isFile() exists() 都是 false
-            try {
-                ftpServer.sendLine(Result.ok(String.valueOf(1)));
-                //传输文件名
-                ftpServer.sendLine(Result.ok(file.getName()));
-                //传输文件大小
-                ftpServer.sendLine(Result.ok(String.valueOf(file.length())));
-
-                download(file, ftpServer.getDataSocket().getOutputStream());
-                ftpServer.getDataSocket().shutdownOutput();
-                ftpServer.sendLine(Result.ok("传输完成"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        ToolUtils.IOUtils.close(ftpServer.getDataSocket());
+        download(ftpServer, file);
     }
-    private void download(File file, OutputStream os){
+
+    private void download(FTPServer ftpServer, File file) {
         try {
-            FileInputStream fis = new FileInputStream(file);
-            int len = 0;
-            byte[] flush = new byte[1024];
-            while((len = fis.read(flush)) != -1){
-                os.write(flush, 0, len);
-                os.flush();
+            OutputStream os = ftpServer.getDataSocket().getOutputStream();
+            //如果是文件夹，那么获取文件夹内的所有文件，并传输给客户端
+            if (file.isDirectory()) {
+                ftpServer.sendLine(Result.ok("directory"));
+                //只获取文件，不获取文件夹
+                File[] files = ToolUtils.FileUntils.getFiles(file);
+                //告知客户端传输文件个数
+                assert files != null;
+                ftpServer.sendLine(Result.ok(String.valueOf(files.length)));
+                //再分别传输文件（这里过滤了文件夹，如果需要处理文件夹，那么需要递归处理，这里省略）
+                for (File f : files) {
+                    //传输文件名
+                    ftpServer.sendLine(Result.ok(f.getName()));
+                    //传输文件大小
+                    ftpServer.sendLine(Result.ok(String.valueOf(f.length())));
+                    ToolUtils.FileUntils.transFile(new FileInputStream(f), os);
+                    Thread.sleep(500);
+                }
+            } else {   //下载的是文件，注意：如果文件路径是不存在的，那么 isDirectory() isFile() exists() 都是 false
+                ftpServer.sendLine(Result.ok("file"));
+                ToolUtils.FileUntils.transFile(new FileInputStream(file), os);
             }
-            ToolUtils.IOUtils.close(fis);
-        } catch (IOException e) {
+            ToolUtils.IOUtils.close(ftpServer.getDataSocket());
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+        ftpServer.sendLine(Result.ok("传输完成"));
     }
+
 }

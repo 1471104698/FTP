@@ -15,7 +15,7 @@ import java.net.Socket;
  * @Description:
  * @Date 2020/5/2 15:31
  */
-public class FTPServer extends Thread {
+public class FTPServer extends Thread implements FTP{
     private Logger logger = Logger.getLogger(FTPServer.class);
 
     //
@@ -30,16 +30,19 @@ public class FTPServer extends Thread {
     //客户端和服务端之间文字通信
     private ObjectInputStream reader = null;
     private ObjectOutputStream writer = null;
-
+    private DataInputStream dreader = null;
+    private DataOutputStream dwriter = null;
     //FTP 服务器路径
-    // private static String path = "F:" + File.separator + "书籍";
-    private static String path = "F:\\";
+    private String path = "F:" + File.separator + "书籍";
+    // private static String path = "F:\\";
 
     public FTPServer(Socket msgSocket) {
         this.msgSocket = msgSocket;
         try {
             reader = new ObjectInputStream(msgSocket.getInputStream());
             writer = new ObjectOutputStream(msgSocket.getOutputStream());
+            dreader = new DataInputStream(msgSocket.getInputStream());
+            dwriter = new DataOutputStream((msgSocket.getOutputStream()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -78,6 +81,21 @@ public class FTPServer extends Thread {
     }
 
     /**
+     * 发送消息给服务端
+     *
+     * @param str
+     */
+    private void sendLineUTF(String str) {
+        try {
+            dwriter.writeUTF(str);
+            dwriter.flush();
+        } catch (IOException e) {
+            // logger.error("发送消息到服务器失败");
+            System.out.println("发送消息到服务器失败");
+        }
+    }
+
+    /**
      * 读取服务器返回的信息
      *
      * @return
@@ -90,6 +108,20 @@ public class FTPServer extends Thread {
             // logger.error("读取客户端消息错误");
             System.out.println("读取客户端消息错误");
         }
+    }
+
+    /**
+     * 读取服务器返回的信息
+     * @return
+     */
+    public String readLineUTF(){
+        try {
+            return dreader.readUTF();
+        } catch (IOException e) {
+            // logger.error("读取服务器消息错误");
+            System.out.println("读取服务器消息错误");
+        }
+        return "";
     }
 
     public void setDataSocket(Socket dataSocket) {
@@ -116,7 +148,7 @@ public class FTPServer extends Thread {
         return order;
     }
 
-    public static String getPath() {
+    public String getPath() {
         return path;
     }
 }

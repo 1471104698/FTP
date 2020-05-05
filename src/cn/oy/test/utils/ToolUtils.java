@@ -4,9 +4,7 @@ import cn.oy.test.processor.*;
 import cn.oy.test.processor.impl.*;
 import cn.oy.test.model.TYPE;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,6 +53,55 @@ public class ToolUtils {
             File file = new File(path);
             if(!file.exists()){
                 file.mkdirs();
+            }
+        }
+
+        /**
+         * 获取文件夹下所有的文件，不包括文件夹
+         * @param file
+         * @return
+         */
+        public static File[] getFiles(File file){
+            return file.listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    return f.isFile();
+                }
+            });
+        }
+
+        public static void transFile(InputStream is, OutputStream os){
+            try {
+                int len = 0;
+                byte[] flush = new byte[1024];
+                while((len = is.read(flush)) != -1){
+                    os.write(flush, 0, len);
+                    os.flush();
+                }
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public static void transMultiFiles(InputStream is, long sum, String path) {
+            try {
+                //获取本地输出流，用来写文件
+                FileOutputStream fos = new FileOutputStream(path);
+
+                //进行文件传输
+                int len = 0;
+                byte[] flush = new byte[1024];
+                while ((len = is.read(flush)) != -1) {
+                    fos.write(flush, 0, len);
+                    sum -= len;
+                    if(sum == 0){
+                        break;
+                    }
+                }
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
