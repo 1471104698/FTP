@@ -49,6 +49,14 @@ public class Order extends Message {
         return new Order(TYPE.PASV.name());
     }
 
+    public static Order down(String msg) {
+        return new Order(TYPE.DOWN.name(), msg);
+    }
+
+    public static Order upload(String msg) {
+        return new Order(TYPE.UPLOAD.name(), msg);
+    }
+
     public String getType() {
         return type;
     }

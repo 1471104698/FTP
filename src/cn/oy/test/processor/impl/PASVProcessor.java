@@ -7,7 +7,6 @@ import cn.oy.test.processor.Commond;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.Random;
 
 /**
  * @author 蒜头王八
@@ -37,6 +36,7 @@ public class PASVProcessor implements Commond {
          使用 InetSocketAddress inetAddress = new InetSocketAddress(0); ，传入 0 端口，默认会返回一个空闲的端口
          socket.bind(inetAddress) 进行绑定即可
      */
+        System.out.println("进入 PASV 模式");
         //随机获取一个空闲的端口号
         InetSocketAddress inetAddress = new InetSocketAddress(0);
 

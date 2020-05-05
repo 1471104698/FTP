@@ -19,12 +19,17 @@ public class DownloadProcessor implements Commond {
     public void commond(Order order, FTPServer ftpServer) {
 
 
-        String path = order.getMsg();
+        String fileName = order.getMsg();
+        String path = FTPServer.getPath() + File.separator + fileName;
         File file = new File(path);
-        //下载的是文件夹
-        if(file.isDirectory()){
+        if(!file.exists()){
+            ftpServer.sendLine(Result.error("文件不存在"));
+            return;
+        }
+        ftpServer.sendLine(Result.ok("开始文件传输..."));
+        if(file.isDirectory()){   //下载的是文件夹
             File[] files = file.listFiles();
-            //先给客户端传输文件个数
+            //告知客户端传输文件个数
             assert files != null;
             ftpServer.sendLine(Result.ok(String.valueOf(files.length)));
             //再分别传输文件
@@ -35,18 +40,27 @@ public class DownloadProcessor implements Commond {
                 ftpServer.sendLine(Result.ok(String.valueOf(f.length())));
                 try {
                     download(f, ftpServer.getDataSocket().getOutputStream());
-                } catch (IOException e) {
+                    Thread.sleep(500);
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-        }else if(file.exists()){   //下载的是文件，注意：如果文件路径是不存在的，那么 isDirectory() isFile() exists() 都是 false
+        }else {   //下载的是文件，注意：如果文件路径是不存在的，那么 isDirectory() isFile() exists() 都是 false
             try {
+                ftpServer.sendLine(Result.ok(String.valueOf(1)));
+                //传输文件名
+                ftpServer.sendLine(Result.ok(file.getName()));
+                //传输文件大小
+                ftpServer.sendLine(Result.ok(String.valueOf(file.length())));
+
                 download(file, ftpServer.getDataSocket().getOutputStream());
+                ftpServer.getDataSocket().shutdownOutput();
                 ftpServer.sendLine(Result.ok("传输完成"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        ToolUtils.IOUtils.close(ftpServer.getDataSocket());
     }
     private void download(File file, OutputStream os){
         try {
@@ -55,6 +69,7 @@ public class DownloadProcessor implements Commond {
             byte[] flush = new byte[1024];
             while((len = fis.read(flush)) != -1){
                 os.write(flush, 0, len);
+                os.flush();
             }
             ToolUtils.IOUtils.close(fis);
         } catch (IOException e) {

@@ -3,6 +3,7 @@ package cn.oy.test.io;
 import cn.oy.test.model.Order;
 import cn.oy.test.model.Result;
 import cn.oy.test.utils.ToolUtils;
+import com.sun.org.apache.xpath.internal.operations.Or;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -23,7 +24,7 @@ public class FTPClient {
         ftpClient.readLine();
         System.out.println(ftpClient.result.getMsg());
         //进入数据传输模式
-
+        ftpClient.downland();
         //停止连接,关闭 socket
         ftpClient.closeFTP();
     }
@@ -48,6 +49,15 @@ public class FTPClient {
 
     //服务端响应消息实体
     Result result;
+
+    //下载服务器文件名
+    String downFile = "";
+
+    //上传的本地文件名
+    String uploadFile = "";
+
+    //本地路径
+    static String path = "F:" + File.separator + "FTP临时文件夹";
 
     public FTPClient() {
         try {
@@ -103,6 +113,8 @@ public class FTPClient {
      * @param filePath
      */
     private void upload(String filePath) {
+
+        pasv();
         try(
                 FileInputStream fis = new FileInputStream(filePath);
                 OutputStream os = dataSocket.getOutputStream()
@@ -111,6 +123,7 @@ public class FTPClient {
             byte[] flush = new byte[1024];
             while((len = fis.read(flush)) != -1){
                 os.write(flush, 0, len);
+                os.flush();
             }
             ToolUtils.IOUtils.close(fis, os, dataSocket);
         } catch (IOException e) {
@@ -118,29 +131,83 @@ public class FTPClient {
         }
     }
 
-    /**
-     * 下载文件
-     * @param filePath
-     */
-    private void downland(String filePath) {
-        
-        //发送给服务端，表示要下载某个文件，让服务通知是否存在该文件，如果存在，那么返回下载，如果不存在，那么直接 return
-        //可以在下载文件前获取文件列表
-        try(
-                FileOutputStream fos = new FileOutputStream(filePath);
-                InputStream is = dataSocket.getInputStream();
-        ) {
-            int len = 0;
-            byte[] flush = new byte[1024];
-            while((len = is.read(flush)) != -1){
-                fos.write(flush, 0, len);
-            }
-            ToolUtils.IOUtils.close(is, fos, dataSocket);
+    private void pasv(){
+        //进行 pasv 肯定需要进行文件传输，那么需要判断是否存在本地目录文件夹
+        mkdir();
+
+        //发送 PASV 请求给服务端
+        sendLine(Order.pasv());
+        //获取服务端端口号
+        readLine();
+        int port = Integer.parseInt(result.getMsg());
+        try {
+            //连接服务端
+            dataSocket = new Socket(SERVER_IP, port);
         } catch (IOException e) {
-            logger.error("上传文件失败");
+            e.printStackTrace();
         }
     }
 
+    /**
+     * 下载文件
+     */
+    private void downland() {
+        //建立 pasv 连接
+        pasv();
+
+        System.out.println("输入要下载的文件名：");
+        downFile = scanner.nextLine();
+        //将文件名发送给服务端，表示要下载某个文件，让服务通知是否存在该文件，如果存在，那么返回下载，如果不存在，那么直接 return
+        sendLine(Order.down(downFile));
+        readLine();
+        System.out.println(result);
+        if(result.getCode() == 500){
+            return;
+        }
+        try {
+            InputStream is = dataSocket.getInputStream();
+            //获取文件个数
+            readLine();
+            int number = Integer.parseInt(result.getMsg());
+            while (number-- > 0){
+
+                //获取文件名称
+                readLine();
+                String fileName = result.getMsg();
+                //获取文件大小
+                readLine();
+                long sum = Long.parseLong(result.getMsg());
+
+                //获取本地输出流，用来写文件
+                FileOutputStream fos = new FileOutputStream(path + File.separator + fileName);
+
+                //进行文件传输
+                int len = 0;
+                byte[] flush = new byte[1024];
+                while ((len = is.read(flush)) != -1) {
+                    fos.write(flush, 0, len);
+                    sum -= len;
+                    if(sum == 0){
+                        break;
+                    }
+                }
+                fos.close();
+            }
+            dataSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 创建文件夹
+     */
+    private void mkdir(){
+        File file = new File(path);
+        if(!file.exists()){
+            file.mkdirs();
+        }
+    }
 
     /**
      * 发送消息给服务端

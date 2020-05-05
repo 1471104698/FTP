@@ -1,10 +1,7 @@
 package cn.oy.test.utils;
 
 import cn.oy.test.processor.*;
-import cn.oy.test.processor.impl.ListProcessor;
-import cn.oy.test.processor.impl.PwdProcessor;
-import cn.oy.test.processor.impl.QuitProcessor;
-import cn.oy.test.processor.impl.UserProcessor;
+import cn.oy.test.processor.impl.*;
 import cn.oy.test.model.TYPE;
 
 import java.io.Closeable;
@@ -26,6 +23,9 @@ public class ToolUtils {
         commondMap.put(TYPE.PWD.name(), new PwdProcessor());
         commondMap.put(TYPE.LIST.name(), new ListProcessor());
         commondMap.put(TYPE.QUIT.name(), new QuitProcessor());
+        commondMap.put(TYPE.PASV.name(), new PASVProcessor());
+        commondMap.put(TYPE.DOWN.name(), new DownloadProcessor());
+        commondMap.put(TYPE.UPLOAD.name(), new UploadProcessor());
     }
 
     public static class StringUtils{

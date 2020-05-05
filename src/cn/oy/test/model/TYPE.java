@@ -12,5 +12,7 @@ public enum TYPE {
     CMD,
     QUIT,
     LIST,
-    PASV;
+    PASV,
+    DOWN,
+    UPLOAD;
 }

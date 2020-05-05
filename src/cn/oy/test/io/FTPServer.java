@@ -6,7 +6,6 @@ import cn.oy.test.utils.ToolUtils;
 import org.apache.log4j.Logger;
 
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -33,7 +32,8 @@ public class FTPServer extends Thread {
     private ObjectOutputStream writer = null;
 
     //FTP 服务器路径
-    private static String path = "F:" + File.separator + "书籍";
+    // private static String path = "F:" + File.separator + "书籍";
+    private static String path = "F:\\";
 
     public FTPServer(Socket msgSocket) {
         this.msgSocket = msgSocket;
