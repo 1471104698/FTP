@@ -22,8 +22,8 @@ public class FTPServer extends FTP<Result, Order>{
     private ServerSocket server = null;
 
     //FTP 服务器路径
-    // private String path = "F:" + File.separator + "书籍";
-    private static String path = "F:" + File.separator;
+    private String path = "F:" + File.separator + "书籍";
+    // private static String path = "F:" + File.separator;
 
     public FTPServer(Socket msgSocket) throws IOException {
         super(msgSocket);
@@ -48,24 +48,12 @@ public class FTPServer extends FTP<Result, Order>{
     }
 
 
-    public void setDataSocket(Socket dataSocket) {
-        this.dataSocket = dataSocket;
-    }
-
     public void setServer(ServerSocket server) {
         this.server = server;
     }
 
     public ServerSocket getServer() {
         return server;
-    }
-
-    public Socket getDataSocket() {
-        return dataSocket;
-    }
-
-    public Order getOrder() {
-        return msg;
     }
 
     public String getPath() {

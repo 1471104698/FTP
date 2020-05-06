@@ -1,5 +1,7 @@
 package cn.oy.test.io;
 
+import cn.oy.test.constant.ConfigContanst;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -19,7 +21,7 @@ public class StartServer extends Thread {
         ExecutorService threadPool = Executors.newFixedThreadPool(100);
         try {
             //此处的 ss 仅仅用于接收客户端连接的 socket，不与客户端进行通信
-            ServerSocket server = new ServerSocket(20);
+            ServerSocket server = new ServerSocket(ConfigContanst.SERCER_PORT);
             while (true){
                 // 获取过程中会阻塞
                 Socket client = server.accept();

@@ -100,6 +100,14 @@ public abstract class FTP<T, V> {
         return msgSocket;
     }
 
+    public Socket getDataSocket() {
+        return dataSocket;
+    }
+
+    public void setDataSocket(Socket dataSocket) {
+        this.dataSocket = dataSocket;
+    }
+
     public V getMsg() {
         return msg;
     }

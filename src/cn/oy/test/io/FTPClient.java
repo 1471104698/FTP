@@ -1,5 +1,6 @@
 package cn.oy.test.io;
 
+import cn.oy.test.constant.ConfigContanst;
 import cn.oy.test.model.Order;
 import cn.oy.test.model.Result;
 import cn.oy.test.utils.ToolUtils;
@@ -22,11 +23,6 @@ public class FTPClient extends FTP<Order, Result> {
 
     private static Logger logger = Logger.getLogger(FTPClient.class);
 
-    //服务端 ip
-    static String SERVER_IP = "localhost";
-    //服务端端口
-    static int SERCER_PORT = 20;
-
     static Scanner scanner = new Scanner(System.in);
 
     //下载服务器文件名
@@ -42,7 +38,7 @@ public class FTPClient extends FTP<Order, Result> {
     String op = "";
 
     public FTPClient() throws IOException {
-        super(new Socket(SERVER_IP, SERCER_PORT));
+        super(new Socket(ConfigContanst.SERVER_IP, ConfigContanst.SERCER_PORT));
         reader = new ObjectInputStream(getMsgSocket().getInputStream());
         writer = new ObjectOutputStream(getMsgSocket().getOutputStream());
         connect();
@@ -126,7 +122,7 @@ public class FTPClient extends FTP<Order, Result> {
         int port = Integer.parseInt(msg.getMsg());
         try {
             //连接服务端
-            dataSocket = new Socket(SERVER_IP, port);
+            dataSocket = new Socket(ConfigContanst.SERVER_IP, port);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -145,17 +141,11 @@ public class FTPClient extends FTP<Order, Result> {
             System.out.println("文件/文件夹不存在");
             return;
         }
+        //发送上传文件指令
         sendLine(Order.upload(uploadFile));
-        if (file.isDirectory()) {
-            sendLineUTF("directory");
-            uploadMultiFiles(file);
-        } else {
-            sendLineUTF("file");
-            uploadSingleFile(file);
-        }
-        ToolUtils.IOUtils.close(dataSocket);
-        readLine();
-        System.out.println(msg);
+
+        ToolUtils.FileUntils.writeFile(this, file);
+        System.out.println(readLineUTF());
     }
 
     /**
@@ -213,62 +203,20 @@ public class FTPClient extends FTP<Order, Result> {
         if (msg.getCode() == 500) {
             return;
         }
-        File file = new File(path + File.separator + downFile);
+        /*
+        这里组合成 F:\\(下载的文件名/文件夹)
+        如果是文件名，比如 downFile = B站.txt，那么 pa = F:\\B站
+        如果是文件夹，比如 downFile = 书籍，那么 pa = F:\\书籍
+         */
+        String pa = path + File.separator + downFile;
+
+        File file = new File(pa);
         if (file.exists()) {
             System.out.println("文件已经存在");
             return;
         }
-        //获取服务端返回的通知：文件 或 文件夹
-        readLine();
-        if ("file".equals(msg.getMsg())) {
-            downloadSingleFile();
-        } else {
-            downloadMultiFiles();
-        }
-        ToolUtils.IOUtils.close(dataSocket);
-        readLine();
-        System.out.println(msg);
-    }
-
-    /**
-     * 多个文件下载
-     *
-     * @throws IOException
-     */
-    private void downloadMultiFiles() {
-        try {
-            InputStream is = dataSocket.getInputStream();
-            //获取文件个数
-            int number = Integer.parseInt(readLineUTF());
-
-            while (number-- > 0) {
-
-                //获取文件名称
-                String fileName = readLineUTF();
-                //获取文件大小
-                long sum = Long.parseLong(readLineUTF());
-                String pa = path + File.separator + fileName;
-                ToolUtils.FileUntils.rwFileByLimit(is, sum, new FileOutputStream(pa));
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /**
-     * 单个文件下载
-     */
-    private void downloadSingleFile() {
-        try {
-            String pa = path + File.separator + downFile;
-            //获取本地输出流，用来写文件
-            FileOutputStream fos = new FileOutputStream(pa);
-            InputStream is = dataSocket.getInputStream();
-            ToolUtils.FileUntils.rwFile(is, fos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //下载文件
+        ToolUtils.FileUntils.readFile(this, pa);
+        System.out.println(readLineUTF());
     }
 }

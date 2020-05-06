@@ -30,34 +30,8 @@ public class DownloadProcessor implements Commond {
     }
 
     private void download(FTPServer ftpServer, File file) {
-        try {
-            OutputStream os = ftpServer.getDataSocket().getOutputStream();
-            //如果是文件夹，那么获取文件夹内的所有文件，并传输给客户端
-            if (file.isDirectory()) {
-                ftpServer.sendLine(Result.ok("directory"));
-                //只获取文件，不获取文件夹
-                File[] files = ToolUtils.FileUntils.getFiles(file);
-                //告知客户端传输文件个数
-                assert files != null;
-                ftpServer.sendLineUTF(String.valueOf(files.length));
-                //再分别传输文件（这里过滤了文件夹，如果需要处理文件夹，那么需要递归处理，这里省略）
-                for (File f : files) {
-                    //传输文件名
-                    ftpServer.sendLineUTF(f.getName());
-                    //传输文件大小
-                    ftpServer.sendLineUTF(String.valueOf(f.length()));
-                    ToolUtils.FileUntils.rwFile(new FileInputStream(f), os);
-                    Thread.sleep(500);
-                }
-            } else {   //下载的是文件，注意：如果文件路径是不存在的，那么 isDirectory() isFile() exists() 都是 false
-                ftpServer.sendLine(Result.ok("file"));
-                ToolUtils.FileUntils.rwFile(new FileInputStream(file), os);
-            }
-            ToolUtils.IOUtils.close(ftpServer.getDataSocket());
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        ftpServer.sendLine(Result.ok("传输完成"));
+        ToolUtils.FileUntils.writeFile(ftpServer, file);
+        ftpServer.sendLineUTF("传输完成");
     }
 
 }
