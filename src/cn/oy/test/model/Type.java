@@ -6,7 +6,7 @@ package cn.oy.test.model;
  * @Description:
  * @Date 2020/5/3 21:42
  */
-public enum TYPE {
+public enum Type {
     USER,
     PWD,
     CMD,

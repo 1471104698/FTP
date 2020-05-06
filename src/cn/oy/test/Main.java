@@ -1,18 +1,11 @@
 package cn.oy.test;
 
-import cn.oy.test.io.FTPClient;
-import cn.oy.test.io.FTPServer;
-import cn.oy.test.model.Order;
-import cn.oy.test.model.Result;
 import cn.oy.test.utils.ToolUtils;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import org.junit.Test;
 
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class Main {
     public static String path = "F:" + File.separator + "书籍" + File.separator + "Java核心技术++卷1++基础知识++原书第10版--中文版扫描--带书签已OCR.pdf";
@@ -52,17 +45,7 @@ public class Main {
             //获取本地输出流，用来写文件
             FileOutputStream fos = new FileOutputStream("F:\\FTP临时文件夹\\" + fileName);
 
-            //进行文件传输
-            int len = 0;
-            byte[] flush = new byte[1024];
-            while ((len = is.read(flush)) != -1) {
-                fos.write(flush, 0, len);
-                sum -= len;
-                if (sum == 0) {
-                    break;
-                }
-            }
-            fos.close();
+            ToolUtils.FileUntils.rwFileByLimit(is, sum, fos);
         }
         socket.close();
     }
@@ -100,12 +83,7 @@ public class Main {
             dos.writeUTF(f.getName());
             //发送文件大小
             dos.writeUTF(String.valueOf(f.length()));
-            //进行文件传输
-            int len = 0;
-            byte[] flush = new byte[1024];
-            while ((len = fis.read(flush)) != -1) {
-                os.write(flush, 0, len);
-            }
+            ToolUtils.FileUntils.rwFile(fis, os);
             fis.close();
         }
     }

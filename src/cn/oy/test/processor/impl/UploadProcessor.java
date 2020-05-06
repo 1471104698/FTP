@@ -24,13 +24,13 @@ public class UploadProcessor implements Commond {
             String path = ftpServer.getPath() + File.separator + fileName;
             //获取文件类型
             String type = ftpServer.readLineUTF();
-            if("file".equals(type)){
-                ToolUtils.FileUntils.transFile(is, new FileOutputStream(path));
-            }else{
+            if ("file".equals(type)) {
+                ToolUtils.FileUntils.rwFile(is, new FileOutputStream(path));
+            } else {
                 ToolUtils.FileUntils.mkdir(path);
                 //获取文件个数
                 int numbers = Integer.parseInt(ftpServer.readLineUTF());
-                while (numbers-- > 0){
+                while (numbers-- > 0) {
                     //获取文件名称
                     fileName = ftpServer.readLineUTF();
                     //获取文件大小
@@ -38,7 +38,7 @@ public class UploadProcessor implements Commond {
 
                     String pa = path + File.separator + fileName;
 
-                    ToolUtils.FileUntils.transMultiFiles(is, sum, pa);
+                    ToolUtils.FileUntils.rwFileByLimit(is, sum, new FileOutputStream(pa));
                 }
             }
         } catch (IOException e) {

@@ -2,7 +2,7 @@ package cn.oy.test.utils;
 
 import cn.oy.test.processor.*;
 import cn.oy.test.processor.impl.*;
-import cn.oy.test.model.TYPE;
+import cn.oy.test.model.Type;
 
 import java.io.*;
 import java.util.HashMap;
@@ -17,13 +17,13 @@ import java.util.Map;
 public class ToolUtils {
     public static Map<String, Commond> commondMap = new HashMap<>();
     static {
-        commondMap.put(TYPE.USER.name(), new UserProcessor());
-        commondMap.put(TYPE.PWD.name(), new PwdProcessor());
-        commondMap.put(TYPE.LIST.name(), new ListProcessor());
-        commondMap.put(TYPE.QUIT.name(), new QuitProcessor());
-        commondMap.put(TYPE.PASV.name(), new PASVProcessor());
-        commondMap.put(TYPE.DOWN.name(), new DownloadProcessor());
-        commondMap.put(TYPE.UPLOAD.name(), new UploadProcessor());
+        commondMap.put(Type.USER.name(), new UserProcessor());
+        commondMap.put(Type.PWD.name(), new PwdProcessor());
+        commondMap.put(Type.LIST.name(), new ListProcessor());
+        commondMap.put(Type.QUIT.name(), new QuitProcessor());
+        commondMap.put(Type.PASV.name(), new PASVProcessor());
+        commondMap.put(Type.DOWN.name(), new DownloadProcessor());
+        commondMap.put(Type.UPLOAD.name(), new UploadProcessor());
     }
 
     public static class StringUtils{
@@ -49,6 +49,10 @@ public class ToolUtils {
     }
 
     public static class FileUntils{
+        /**
+         * 创建文件夹
+         * @param path
+         */
         public static void mkdir(String path){
             File file = new File(path);
             if(!file.exists()){
@@ -70,7 +74,12 @@ public class ToolUtils {
             });
         }
 
-        public static void transFile(InputStream is, OutputStream os){
+        /**
+         * 传入 输入流 和 输出流， 进行文件的读写
+         * @param is
+         * @param os
+         */
+        public static void rwFile(InputStream is, OutputStream os){
             try {
                 int len = 0;
                 byte[] flush = new byte[1024];
@@ -84,22 +93,27 @@ public class ToolUtils {
             }
         }
 
-        public static void transMultiFiles(InputStream is, long sum, String path) {
+        /**
+         * 传入 输入流 和 输出流，以及文件的大小，对文件进行限定读写
+         * @param is
+         * @param sum
+         * @param os
+         */
+        public static void rwFileByLimit(InputStream is, long sum, OutputStream os) {
             try {
                 //获取本地输出流，用来写文件
-                FileOutputStream fos = new FileOutputStream(path);
 
                 //进行文件传输
                 int len = 0;
                 byte[] flush = new byte[1024];
                 while ((len = is.read(flush)) != -1) {
-                    fos.write(flush, 0, len);
+                    os.write(flush, 0, len);
                     sum -= len;
                     if(sum == 0){
                         break;
                     }
                 }
-                fos.close();
+                os.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

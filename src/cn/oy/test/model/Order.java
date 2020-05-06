@@ -1,7 +1,5 @@
 package cn.oy.test.model;
 
-import com.sun.org.apache.xpath.internal.operations.Or;
-
 /**
  * @author 蒜头王八
  * @project: ftp
@@ -26,35 +24,35 @@ public class Order extends Message {
     }
 
     public static Order user(String msg) {
-        return new Order(TYPE.USER.name(), msg);
+        return new Order(Type.USER.name(), msg);
     }
 
     public static Order pwd(String msg) {
-        return new Order(TYPE.PWD.name(), msg);
+        return new Order(Type.PWD.name(), msg);
     }
 
     public static Order list() {
-        return new Order(TYPE.LIST.name());
+        return new Order(Type.LIST.name());
     }
 
     public static Order cmd(String msg) {
-        return new Order(TYPE.CMD.name(), msg);
+        return new Order(Type.CMD.name(), msg);
     }
 
     public static Order quit() {
-        return new Order(TYPE.QUIT.name());
+        return new Order(Type.QUIT.name());
     }
 
     public static Order pasv() {
-        return new Order(TYPE.PASV.name());
+        return new Order(Type.PASV.name());
     }
 
     public static Order down(String msg) {
-        return new Order(TYPE.DOWN.name(), msg);
+        return new Order(Type.DOWN.name(), msg);
     }
 
     public static Order upload(String msg) {
-        return new Order(TYPE.UPLOAD.name(), msg);
+        return new Order(Type.UPLOAD.name(), msg);
     }
 
     public String getType() {

@@ -24,7 +24,13 @@ public class StartServer extends Thread {
                 // 获取过程中会阻塞
                 Socket client = server.accept();
                 FTPServer ftpServer = new FTPServer(client);
-                threadPool.execute(ftpServer);
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        ftpServer.run();
+                    }
+                };
+                threadPool.execute(runnable);
             }
         } catch (IOException e) {
             e.printStackTrace();
