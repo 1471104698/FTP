@@ -149,45 +149,6 @@ public class FTPClient extends FTP<Order, Result> {
     }
 
     /**
-     * 上传多个文件
-     */
-    private void uploadMultiFiles(File file) {
-        //告知服务器是文件夹（即存在多文件）
-        //获取所有的文件
-        File[] files = ToolUtils.FileUntils.getFiles(file);
-
-        //告知文件个数
-        sendLineUTF(String.valueOf(files.length));
-        for (File f : files) {
-            //告知文件名称
-            sendLineUTF(f.getName());
-            //告知文件大小
-            sendLineUTF(String.valueOf(f.length()));
-            //进行文件传输
-            uploadSingleFile(f);
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * 上传单个文件
-     */
-    private void uploadSingleFile(File f) {
-        try {
-            FileInputStream fis = new FileInputStream(f);
-            OutputStream os = dataSocket.getOutputStream();
-            ToolUtils.FileUntils.rwFile(fis, os);
-        } catch (IOException e) {
-            // logger.error("上传文件失败");
-            System.out.println("上传文件失败");
-        }
-    }
-
-    /**
      * 下载文件
      */
     private void downland() {
