@@ -31,12 +31,12 @@ public class Order extends Message {
         return new Order(Type.PWD.name(), msg);
     }
 
-    public static Order list() {
-        return new Order(Type.LIST.name());
+    public static Order list(String msg) {
+        return new Order(Type.LIST.name(), msg);
     }
 
-    public static Order cmd(String msg) {
-        return new Order(Type.CMD.name(), msg);
+    public static Order cd(String msg) {
+        return new Order(Type.CD.name(), msg);
     }
 
     public static Order quit() {

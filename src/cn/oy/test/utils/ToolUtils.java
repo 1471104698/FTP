@@ -2,7 +2,6 @@ package cn.oy.test.utils;
 
 import cn.oy.test.constant.ConfigContanst;
 import cn.oy.test.io.FTP;
-import cn.oy.test.model.Result;
 import cn.oy.test.processor.*;
 import cn.oy.test.processor.impl.*;
 import cn.oy.test.model.Type;
@@ -28,6 +27,7 @@ public class ToolUtils {
         commondMap.put(Type.PASV.name(), new PASVProcessor());
         commondMap.put(Type.DOWN.name(), new DownloadProcessor());
         commondMap.put(Type.UPLOAD.name(), new UploadProcessor());
+        commondMap.put(Type.CD.name(), new CdProcessor());
     }
 
     public static class StringUtils {
@@ -83,14 +83,14 @@ public class ToolUtils {
         }
 
         /**
-         * 传入 输入流 和 输出流， 进行文件的读写
+         * 传入 输入流 和 输出流， 进行文件的读写，用于单个文件的传输
          *
          * @param is
          * @param os
          */
-        public static void rwFile(InputStream is, OutputStream os) {
+        private static void rwFile(InputStream is, OutputStream os) {
             try {
-                int len = 0;
+                int len;
                 byte[] flush = new byte[1024];
                 while ((len = is.read(flush)) != -1) {
                     os.write(flush, 0, len);
@@ -103,18 +103,19 @@ public class ToolUtils {
         }
 
         /**
-         * 传入 输入流 和 输出流，以及文件的大小，对文件进行限定读写
+         * 传入 输入流 和 输出流，以及文件的大小，对文件进行限定读写，用于同时多个文件传输
+         * 解决 接收端接收完一个文件，如果发送端不关闭 流 或 连接 就无法接收结束符，导致进入阻塞状态的问题
          *
          * @param is
          * @param sum
          * @param os
          */
-        public static void rwFileByLimit(InputStream is, long sum, OutputStream os) {
+        private static void rwFileByLimit(InputStream is, long sum, OutputStream os) {
             try {
                 //获取本地输出流，用来写文件
 
                 //进行文件传输
-                int len = 0;
+                int len;
                 byte[] flush = new byte[1024];
                 while ((len = is.read(flush)) != -1) {
                     os.write(flush, 0, len);
@@ -129,6 +130,12 @@ public class ToolUtils {
             }
         }
 
+        /**
+         * 从本地读取文件，然后写到网络字节流
+         *
+         * @param ftp
+         * @param file
+         */
         public static void writeFile(FTP ftp, File file) {
             try {
                 OutputStream os = ftp.getDataSocket().getOutputStream();
@@ -161,7 +168,13 @@ public class ToolUtils {
             }
         }
 
-        public static void readFile(FTP ftp, String path) {
+        /**
+         * 从网络字节流读取文件，然后写到本地
+         *
+         * @param ftp
+         * @param path
+         */
+        public static void readFile(FTP ftp, String path, String filePath) {
             //读取要接收的文件类型
             String type = ftp.readLineUTF();
             FileOutputStream os = null;
@@ -169,6 +182,7 @@ public class ToolUtils {
                 InputStream is = ftp.getDataSocket().getInputStream();
                 //如果是文件夹，那么需要处理多个文件
                 if (ConfigContanst.DIRECTORY_TYPE.equals(type)) {
+                    path += filePath + File.separator;
                     mkdir(path);
                     //获取文件个数
                     int number = Integer.parseInt(ftp.readLineUTF());
@@ -179,13 +193,18 @@ public class ToolUtils {
                         String fileName = ftp.readLineUTF();
                         //获取文件大小
                         long sum = Long.parseLong(ftp.readLineUTF());
-                        String pa = path + File.separator + fileName;
-                        os = new FileOutputStream(pa);
-                        rwFileByLimit(is, sum, os);
+                        rwFileByLimit(is, sum, new FileOutputStream(path + fileName));
                     }
-                } else {
-                    //处理单文件
-                    os = new FileOutputStream(path);
+                } else {    //处理单文件
+                    //获取输入的文件的路径
+                    int index = filePath.lastIndexOf("\\");
+                    if(index != -1){
+                        String pa = filePath.substring(0, index);
+                        mkdir(path + File.separator + pa);
+                    }
+
+                    os = new FileOutputStream(path + filePath);
+
                     rwFile(is, os);
                 }
                 ftp.getDataSocket().close();

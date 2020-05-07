@@ -20,9 +20,7 @@ public class UploadProcessor implements Commond {
         //获取文件名称
         String fileName = order.getMsg();
 
-        String path = ftpServer.getPath() + File.separator + fileName;
-
-        ToolUtils.FileUntils.readFile(ftpServer, path);
+        ToolUtils.FileUntils.readFile(ftpServer, ftpServer.getPath(), fileName);
 
         ftpServer.sendLineUTF("传输完成");
     }

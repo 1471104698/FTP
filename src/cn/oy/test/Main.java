@@ -45,7 +45,7 @@ public class Main {
             //获取本地输出流，用来写文件
             FileOutputStream fos = new FileOutputStream("F:\\FTP临时文件夹\\" + fileName);
 
-            ToolUtils.FileUntils.rwFileByLimit(is, sum, fos);
+            // ToolUtils.FileUntils.rwFileByLimit(is, sum, fos);
         }
         socket.close();
     }
@@ -83,7 +83,7 @@ public class Main {
             dos.writeUTF(f.getName());
             //发送文件大小
             dos.writeUTF(String.valueOf(f.length()));
-            ToolUtils.FileUntils.rwFile(fis, os);
+            // ToolUtils.FileUntils.rwFile(fis, os);
             fis.close();
         }
     }

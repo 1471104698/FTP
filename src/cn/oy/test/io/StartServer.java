@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
  * @Description:
  * @Date 2020/5/3 11:37
  */
-public class StartServer extends Thread {
+public class StartServer {
 
     public static void main(String[] args) {
         //连接池
@@ -39,3 +39,9 @@ public class StartServer extends Thread {
         }
     }
 }
+class A{
+    public static void main(String[] args) throws IOException {
+        new FTPClient();
+    }
+}
+

@@ -15,14 +15,16 @@ import java.net.Socket;
  * @Description:
  * @Date 2020/5/2 15:31
  */
-public class FTPServer extends FTP<Result, Order>{
+public class FTPServer extends FTP<Result, Order> {
     private Logger logger = Logger.getLogger(FTPServer.class);
 
     //服务端，这里的服务端跟 StartServer 的不同，用于跟 客户端数据传输的 socket 通信
     private ServerSocket server = null;
 
     //FTP 服务器路径
-    private String path = "F:" + File.separator + "书籍";
+    private String path = "F:" + File.separator + "FTP临时服务器" + File.separator;
+    private String cur_path = path;
+
     // private static String path = "F:" + File.separator;
 
     public FTPServer(Socket msgSocket) throws IOException {
@@ -58,5 +60,13 @@ public class FTPServer extends FTP<Result, Order>{
 
     public String getPath() {
         return path;
+    }
+
+    public String getCur_path() {
+        return cur_path;
+    }
+
+    public void setCur_path(String cur_path) {
+        this.cur_path = cur_path;
     }
 }

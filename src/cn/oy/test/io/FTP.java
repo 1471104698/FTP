@@ -82,9 +82,10 @@ public abstract class FTP<T, V> {
 
     /**
      * 读取服务器返回的信息
+     *
      * @return
      */
-    public String readLineUTF(){
+    public String readLineUTF() {
         try {
             return dreader.readUTF();
         } catch (IOException e) {
@@ -93,7 +94,6 @@ public abstract class FTP<T, V> {
         }
         return "";
     }
-
 
 
     public Socket getMsgSocket() {

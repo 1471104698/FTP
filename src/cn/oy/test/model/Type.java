@@ -9,7 +9,7 @@ package cn.oy.test.model;
 public enum Type {
     USER,
     PWD,
-    CMD,
+    CD,
     QUIT,
     LIST,
     PASV,

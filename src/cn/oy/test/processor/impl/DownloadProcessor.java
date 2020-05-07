@@ -18,7 +18,7 @@ public class DownloadProcessor implements Commond {
     @Override
     public void commond(Order order, FTPServer ftpServer) {
         String fileName = order.getMsg();
-        String path = ftpServer.getPath() + File.separator + fileName;
+        String path = ftpServer.getPath() + fileName;
         File file = new File(path);
         //判断文件是否存在
         if (!file.exists()) {
@@ -26,12 +26,7 @@ public class DownloadProcessor implements Commond {
             return;
         }
         ftpServer.sendLine(Result.ok("开始文件传输..."));
-        download(ftpServer, file);
-    }
-
-    private void download(FTPServer ftpServer, File file) {
         ToolUtils.FileUntils.writeFile(ftpServer, file);
         ftpServer.sendLineUTF("传输完成");
     }
-
 }
